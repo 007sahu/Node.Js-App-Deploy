@@ -1,72 +1,77 @@
-# Deploying a Node Js Application on AWS EC2
+ I followed below steps for the execution :-
 
-### Testing the project locally
+● Ubuntu server/VM creation and ssh. 
 
-1. Clone this project
-```
-git clone https://github.com/verma-kunal/AWS-Session.git
-```
-2. Setup the following environment variables - `(.env)` file
-```
+●Configuring Ubuntu on remote VM
+
+• Updating the outdated packages and dependencies - 
+
+- sudo apt update
+
+
+• Install Git - 
+
+- sudo apt install git 
+
+
+• Configure Node.js and npm (package manager) - 
+
+- sudo apt install node.js
+
+- sudo apt install npm
+
+
+●Deploying the project on Azure
+
+• Clone this project in the remote VM
+
+git clone https://lnkd.in/g9x-eXX8 
+
+
+
+Setup the following environment variables - (.env) file
 DOMAIN= ""
 PORT=3000
 STATIC_DIR="./client"
 
 PUBLISHABLE_KEY=""
 SECRET_KEY=""
-```
-3. Initialise and start the project
-```
-npm install
-npm run start
-```
 
-### Set up an AWS EC2 instance
+For this project , I used 'Stripe.com' for setting up publishable and secret api keys in .env file.
 
-1. Create an IAM user & login to your AWS Console
-    - Access Type - Password
-    - Permissions - Admin
-2. Create an EC2 instance
-    - Select an OS image - Ubuntu
-    - Create a new key pair & download `.pem` file
-    - Instance type - t2.micro
-3. Connecting to the instance using ssh
-```
-ssh -i instance.pem ubunutu@<IP_ADDRESS>
-```
+● Initialise and start the project
 
-### Configuring Ubuntu on remote VM
+- npm install
+- npm run start
 
-1. Updating the outdated packages and dependencies
-```
-sudo apt update
-```
-3. Install Git - [Guide by DigitalOcean](https://www.digitalocean.com/community/tutorials/how-to-install-git-on-ubuntu-22-04) 
-4. Configure Node.js and `npm` - [Guide by DigitalOcean](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-22-04)
+"The server was listening at 3000"
 
-### Deploying the project on AWS
+The Challenge : 
+After setting up the VM, installing Node.js, and running the app, I couldn’t access it via the browser using the VM’s public IP and port. The dreaded "Site Can’t Be Reached" error haunted me! 😅 
 
-1. Clone this project in the remote VM
-```
-git clone https://github.com/verma-kunal/AWS-Session.git
-```
-2. Setup the following environment variables - `(.env)` file
-```
-DOMAIN= ""
-PORT=3000
-STATIC_DIR="./client"
+Root Causes : 
+1️⃣ Azure Network Security Group (NSG): By default, Azure blocks all inbound traffic except SSH. 
+2️⃣ Node.js Binding: My app was listening on `localhost` instead of `0.0.0.0`, blocking external requests. 
+ 
 
-PUBLISHABLE_KEY=""
-SECRET_KEY=""
-```
-> For this project, we'll have to set up an [Elastic IP Address](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html) for our EC2 & that would be our `DOMAIN`
+The Fix : 
+✅ Azure NSG Inbound Rule: Added a custom inbound rule in Azure’s Networking tab to allow traffic on my app’s port (e.g., 3000). 
+✅ Node.js Binding : Updated `app.listen()` to bind to `0.0.0.0` instead of `127.0.0.1`. 
 
-3. Initialise and start the project
-```
-npm install
-npm run start
-```
 
-> NOTE - We will have to edit the **inbound rules** in the security group of our EC2, in order to allow traffic from our particular port
+Key Takeaways : 
+- Cloud Security Layers: Azure’s NSG acts as a first line of defense—always configure it for your app’s needs! 
+- 0.0.0.0 vs. localhost : A tiny code tweak can make or break external accessibility. 
+- Persistence Pays Off : Debugging infrastructure issues is frustrating but rewarding once resolved! 
 
-### Project is deployed on AWS 🎉
+Tools Used : 
+- Microsoft Azure (Ubuntu VM) 
+- Node.js, PM2 (Process Manager) 
+-Github
+
+
+🔗 Why Share This?
+Infrastructure setup is often overlooked in tutorials, but it’s where *real-world magic* (and headaches) happen! If you’re deploying to the cloud, double-check: 
+1. Firewall/NSG Rules
+2. Port Bindings
+3. Logs, Logs, Logs!
